@@ -220,34 +220,67 @@ main{
 /* finalizar o treino */
 .fim-card{
   display:flex;align-items:center;gap:14px;width:100%;text-align:left;
-  border-radius:var(--r);padding:16px;
+  border-radius:var(--r);padding:15px 16px;
   border:1px solid var(--line);background:var(--surface);
   transition:transform var(--fast) var(--ease),background var(--fast) var(--ease),
              border-color var(--fast) var(--ease);
 }
 .fim-card:active{transform:scale(.985)}
-.fim-card .ic{
-  width:46px;height:46px;border-radius:12px;flex:none;display:grid;place-items:center;
-  background:var(--surface-2);border:1px solid var(--line);
-}
-.fim-card .ic svg{width:21px;height:21px;stroke:var(--muted);stroke-width:2.4;fill:none;
-  stroke-linecap:round;stroke-linejoin:round}
-.fim-card .tx{flex:1;min-width:0}
-.fim-card .tx .t{font-family:var(--display);font-size:22px;font-weight:600;line-height:1.1}
-.fim-card .tx .s{font-size:12.5px;color:var(--muted);margin-top:2px}
 
+.fim-card .ic{
+  width:48px;height:48px;border-radius:13px;flex:none;display:grid;place-items:center;
+  background:var(--surface-2);border:1px solid var(--line);
+  transition:background var(--fast) var(--ease),border-color var(--fast) var(--ease);
+}
+.fim-card .ic svg{
+  width:22px;height:22px;stroke:var(--muted);stroke-width:2.3;fill:none;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+
+.fim-card .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.fim-card .tx .t{
+  display:block;font-family:var(--display);font-size:23px;font-weight:600;
+  line-height:1.04;letter-spacing:.012em;
+}
+.fim-card .tx .s{display:block;font-size:12.5px;color:var(--muted);line-height:1.35}
+
+.fim-card .barra{
+  display:block;height:4px;border-radius:3px;background:var(--line);
+  overflow:hidden;margin-top:5px;
+}
+.fim-card .barra i{
+  display:block;height:100%;border-radius:3px;background:var(--verm);
+  transition:width var(--mid) var(--ease);
+}
+
+.fim-card .ponta{
+  flex:none;width:30px;display:grid;place-items:center;
+  transition:transform var(--fast) var(--ease);
+}
+.fim-card .ponta svg{
+  width:17px;height:17px;stroke:var(--dim);stroke-width:2.6;fill:none;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+.fim-card:active .ponta{transform:translateX(3px)}
+
+/* pronto para fechar: todas as series marcadas */
 .fim-card.pronto{
   background:linear-gradient(118deg,var(--verm),#7E0409);border-color:var(--verm-claro);
 }
-.fim-card.pronto .ic{background:rgba(255,255,255,.17);border-color:rgba(255,255,255,.4)}
+.fim-card.pronto .ic{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.45)}
 .fim-card.pronto .ic svg{stroke:#fff}
 .fim-card.pronto .tx .t{color:#fff}
-.fim-card.pronto .tx .s{color:rgba(255,255,255,.85)}
+.fim-card.pronto .tx .s{color:rgba(255,255,255,.88)}
+.fim-card.pronto .barra{background:rgba(255,255,255,.28)}
+.fim-card.pronto .barra i{background:#fff}
+.fim-card.pronto .ponta svg{stroke:#fff}
 
-.fim-card.fechado{border-color:rgba(233,201,107,.5);background:rgba(233,201,107,.09)}
+/* ja finalizado */
+.fim-card.fechado{border-color:rgba(233,201,107,.5);background:rgba(233,201,107,.08)}
 .fim-card.fechado .ic{background:var(--ouro);border-color:var(--ouro)}
-.fim-card.fechado .ic svg{stroke:#2A1D00}
+.fim-card.fechado .ic svg{stroke:#2A1D00;stroke-width:2.8}
 .fim-card.fechado .tx .t{color:var(--ouro)}
+.fim-card.fechado .ponta svg{stroke:var(--ouro)}
 
 /* ===================== EXERCÍCIO ===================== */
 
@@ -327,8 +360,8 @@ main{
 
 .sets{display:flex;flex-direction:column;border-top:1px solid var(--line-soft)}
 .set{
-  display:grid;grid-template-columns:36px 1fr 1fr 48px;
-  align-items:center;gap:8px;padding:7px 14px;min-height:50px;
+  display:grid;grid-template-columns:32px 1fr 1fr 46px;
+  align-items:center;gap:6px;padding:7px 12px;min-height:50px;
   border-bottom:1px solid var(--line-soft);
   transition:background var(--fast) var(--ease);
 }
@@ -345,17 +378,17 @@ main{
 
 .field{position:relative;display:flex;align-items:center}
 .field input{
-  width:100%;min-height:42px;background:var(--preto);
+  width:100%;min-width:0;min-height:42px;background:var(--preto);
   border:1px solid var(--line);border-radius:10px;
-  padding:0 32px 0 11px;font-weight:700;font-size:15px;
-  font-variant-numeric:tabular-nums;
+  padding:0 26px 0 9px;font-weight:700;font-size:15px;
+  font-variant-numeric:tabular-nums;letter-spacing:-.01em;
   transition:border-color var(--fast) var(--ease),background var(--fast) var(--ease);
 }
 .field input::placeholder{color:var(--dim);font-weight:500}
 .field input:focus{border-color:var(--verm);background:var(--surface-2);outline:none}
 .field .u{
-  position:absolute;right:10px;pointer-events:none;
-  font-size:11px;color:var(--dim);font-weight:600;
+  position:absolute;right:8px;pointer-events:none;
+  font-size:10px;color:var(--dim);font-weight:600;letter-spacing:.01em;
 }
 .set.on .field input{border-color:rgba(227,0,15,.45)}
 

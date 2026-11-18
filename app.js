@@ -321,6 +321,23 @@ function datasComTreino(){
 /* ===================== AUXILIARES ===================== */
 
 function num(v){ var n = parseFloat(String(v).replace(",",".")); return isFinite(n)?n:0; }
+
+/* carga: numero com no maximo 2 casas depois da virgula */
+function limpaKg(v){
+  v = String(v).replace(/[^0-9.,]/g, "").replace(/\./g, ",");
+  var p = v.split(",");
+  var inteiro = p[0].slice(0,4);
+  if(p.length === 1) return inteiro;
+  return inteiro + "," + p.slice(1).join("").slice(0,2);
+}
+
+/* repeticoes: so numero inteiro, sem virgula.
+   corta no primeiro separador em vez de juntar os digitos:
+   "10,5" vira "10", e nunca "105" */
+function limpaReps(v){
+  var m = String(v).match(/\d+/);
+  return m ? m[0].slice(0,3) : "";
+}
 function fmtKg(n){ return (Math.round(n*10)/10).toString().replace(".",","); }
 function fmtVol(kg){
   if(kg>=1000) return {n:(Math.round(kg/100)/10).toString().replace(".",","),u:"t"};
@@ -585,34 +602,52 @@ function pintarFim(){
   if(!s || !porChave(s.t)) return;
 
   var p = progresso(dataSel);
-  var pronto = p.total>0 && p.feitas>=p.total;
+  var pct = p.total ? Math.round(p.feitas / p.total * 100) : 0;
+  var pronto = p.total > 0 && p.feitas >= p.total;
+
   var b = document.createElement("button");
   b.type = "button";
   b.className = "fim-card" + (s.fim ? " fechado" : (pronto ? " pronto" : ""));
 
-  var icone = s.fim
-    ? '<path d="M5 13l4.5 4.5L19 7"/>'
-    : (pronto ? '<path d="M5 13l4.5 4.5L19 7"/>' : '<circle cx="12" cy="12" r="8.2"/><path d="M12 7.6V12l2.8 2"/>');
+  var icone, titulo, sub, mostraBarra = true;
 
-  var titulo, sub;
   if(s.fim){
+    icone = '<path d="M5 13l4.5 4.5L19 7"/>';
     titulo = "Treino finalizado";
-    sub = p.feitas+" séries registradas na agenda. Toque pra reabrir.";
+    sub = p.feitas + " séries registradas na agenda. Toque para reabrir.";
+    mostraBarra = false;
   }else if(pronto){
+    icone = '<path d="M5 13l4.5 4.5L19 7"/>';
     titulo = "Finalizar treino";
-    sub = "Todas as "+p.total+" séries marcadas. Fecha o dia e registra na agenda.";
+    sub = "As " + p.total + " séries estão marcadas. Toque para fechar o dia.";
+  }else if(p.feitas === 0){
+    icone = '<circle cx="12" cy="12" r="8.4"/><path d="M12 7.7V12l2.9 2"/>';
+    titulo = "Treino em aberto";
+    sub = "Marque as séries conforme for treinando.";
   }else{
+    icone = '<circle cx="12" cy="12" r="8.4"/><path d="M12 7.7V12l2.9 2"/>';
     titulo = "Finalizar treino";
-    sub = p.feitas+" de "+p.total+" séries. Pode fechar assim mesmo se quiser.";
+    sub = p.feitas + " de " + p.total + " séries, " + pct + "% do treino.";
   }
 
   b.innerHTML =
-    '<span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">'+icone+'</svg></span>'+
-    '<span class="tx"><span class="t">'+titulo+'</span><span class="s">'+sub+'</span></span>';
+    '<span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">' + icone + '</svg></span>' +
+    '<span class="tx">' +
+      '<span class="t">' + titulo + '</span>' +
+      '<span class="s">' + sub + '</span>' +
+      (mostraBarra ? '<span class="barra"><i style="width:' + pct + '%"></i></span>' : '') +
+    '</span>' +
+    '<span class="ponta"><svg viewBox="0 0 24 24" aria-hidden="true">' +
+      (s.fim ? '<path d="M3 12a9 9 0 1 0 2.6-6.4M3 4.2V9h4.8"/>' : '<path d="M9 5l7 7-7 7"/>') +
+    '</svg></span>';
 
-  b.addEventListener("click",function(){
+  b.setAttribute("aria-label", s.fim
+    ? "Reabrir o treino de " + curto(dataSel)
+    : "Finalizar o treino de " + curto(dataSel) + ", " + pct + " por cento concluído");
+
+  b.addEventListener("click", function(){
     if(s.fim){
-      if(!window.confirm("Reabrir o treino de "+curto(dataSel)+" para editar as cargas?")) return;
+      if(!window.confirm("Reabrir o treino de " + curto(dataSel) + " para editar as cargas?")) return;
       s.fim = false; salvar();
       aviso("Treino reaberto");
       pintarTudo();
@@ -623,7 +658,7 @@ function pintarFim(){
       return;
     }
     if(!pronto && !window.confirm(
-        "Você marcou "+p.feitas+" de "+p.total+" séries. Finalizar assim mesmo?")) return;
+        "Você marcou " + p.feitas + " de " + p.total + " séries. Finalizar assim mesmo?")) return;
 
     /* o ciclo tem que ser lido ANTES de marcar como feito, senao o treino que
        fecha o ciclo conta a si mesmo e acaba empurrado para o ciclo seguinte */
@@ -633,12 +668,11 @@ function pintarFim(){
     pararDescanso(true);
     vibrar([40,60,40,60,90]);
 
-    var feitos = feitosDoCiclo(s.c);
-    if(feitos.length >= SEQ.length){
-      aviso("Ciclo "+s.c+" completo. O ciclo "+(s.c+1)+" começa no treino A.");
+    if(feitosDoCiclo(s.c).length >= SEQ.length){
+      aviso("Ciclo " + s.c + " completo. O ciclo " + (s.c+1) + " começa no treino A.");
     }else{
       var prox = sugerido(somaDias(dataSel,1));
-      aviso("Treino "+s.t+" registrado. O próximo é o "+prox.k+", "+prox.n+".");
+      aviso("Treino " + s.t + " registrado. O próximo é o " + prox.k + ", " + prox.n + ".");
     }
     pintarTudo();
   });
@@ -655,6 +689,9 @@ function cardEx(id){
   var card = document.createElement("article");
   card.className = "ex";
   if(series.filter(function(x){return x.ok;}).length >= ex.s) card.classList.add("done");
+
+  /* definido mais abaixo, junto com os botoes do rodape */
+  var rodape = function(){};
 
   /* foto do exercicio: miniatura do video de execucao */
   var foto = document.createElement("a");
@@ -716,8 +753,10 @@ function cardEx(id){
       gravarSeries(dataSel,id,atual);
     }
 
-    fKg.querySelector("input").addEventListener("input",function(){ grava(); });
-    fRp.querySelector("input").addEventListener("input",function(){ grava(); });
+    /* grava e ja libera o botao de replicar, sem redesenhar o card
+       (redesenhar faria o teclado fechar no meio da digitacao) */
+    fKg.querySelector("input").addEventListener("input",function(){ grava(); rodape(); });
+    fRp.querySelector("input").addEventListener("input",function(){ grava(); rodape(); });
 
     chk.addEventListener("click",function(){
       if(travado){ aviso("Reabra o treino pra editar as cargas"); return; }
@@ -780,13 +819,25 @@ function cardEx(id){
   });
 
   /* replicar: copia a ultima serie preenchida para as restantes e marca como feitas */
-  var base = -1;
-  for(var i=0;i<series.length;i++) if(num(series[i].kg)>0) base = i;
+  function ultimaPreenchida(){
+    var atual = seriesDe(dataSel,id), b = -1;
+    for(var i=0;i<atual.length;i++) if(num(atual[i].kg)>0) b = i;
+    return b;
+  }
 
   var bRepl = document.createElement("button");
   bRepl.type="button"; bRepl.className="mini rep"; bRepl.textContent="Replicar nas restantes";
-  bRepl.disabled = travado || base<0 || base>=series.length-1;
+
+  /* recalcula os botoes do rodape a cada tecla, sem recriar o card */
+  rodape = function(){
+    var b = ultimaPreenchida();
+    bRepl.disabled = travado || b < 0 || b >= EX[id].s - 1;
+  };
+  rodape();
+
   bRepl.addEventListener("click",function(){
+    var base = ultimaPreenchida();
+    if(base < 0) return;
     var atual = seriesDe(dataSel,id);
     var kg = atual[base].kg;
     var reps = atual[base].reps || String(ex.r);
@@ -815,14 +866,41 @@ function trocarCard(antigo,id){
 }
 
 function campo(val,ph,un,travado){
+  var ehKg = (un === "kg");
   var w = document.createElement("div");
   w.className = "field";
   var i = document.createElement("input");
-  i.type="text"; i.inputMode="decimal"; i.value = val||""; i.placeholder = ph;
+  i.type = "text";
+  i.inputMode = ehKg ? "decimal" : "numeric";
+  i.maxLength = ehKg ? 7 : 3;
+  i.value = ehKg ? limpaKg(val||"") : limpaReps(val||"");
+  i.placeholder = ph;
   if(travado) i.readOnly = true;
-  i.setAttribute("aria-label", un==="kg"?"Carga em quilos":"Repetições");
+  i.setAttribute("aria-label", ehKg ? "Carga em quilos" : "Repetições");
+
+  /* filtra o que foi digitado sem perder a posicao do cursor */
+  i.addEventListener("input", function(){
+    var antes = this.value;
+    var pos = this.selectionStart;
+    var depois = ehKg ? limpaKg(antes) : limpaReps(antes);
+    if(depois !== antes){
+      this.value = depois;
+      var novo = Math.max(0, pos - (antes.length - depois.length));
+      try{ this.setSelectionRange(novo, novo); }catch(e){}
+    }
+  });
+
+  /* ao sair do campo, arredonda o que ficou pela metade */
+  if(ehKg){
+    i.addEventListener("blur", function(){
+      var v = this.value;
+      if(v.charAt(v.length-1) === ",") this.value = v.slice(0,-1);
+      if(this.value !== v) this.dispatchEvent(new Event("change", {bubbles:true}));
+    });
+  }
+
   var u = document.createElement("span");
-  u.className="u"; u.textContent = un;
+  u.className = "u"; u.textContent = un;
   w.appendChild(i); w.appendChild(u);
   return w;
 }

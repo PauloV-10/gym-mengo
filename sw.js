@@ -1,5 +1,5 @@
 /* Gym Mengo: cache do app para funcionar sem internet. */
-var CACHE = "gym-mengo-v3";
+var CACHE = "gym-mengo-v4";
 var ARQUIVOS = [
   "./",
   "./index.html",
