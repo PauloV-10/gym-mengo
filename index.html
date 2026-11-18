@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>Gym Mengo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="App de treino rubro-negro: registro de cargas, calendário de treinos, recordes e vídeo de execução de cada exercício.">
+<meta name="description" content="Treino rubro-negro do Raphael: registro de cargas, calendário, recordes e vídeo de execução de cada exercício.">
 <meta name="theme-color" content="#0C0B0C">
 <meta name="color-scheme" content="dark">
 
@@ -19,6 +19,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://img.youtube.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Teko:wght@500;600;700&display=swap">
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -26,15 +27,15 @@
 
 <div class="shell">
 
-  <!-- navegação lateral, só no PC -->
   <aside class="side">
     <div class="hoops"></div>
     <div class="logo">
       <div class="k">Treino rubro-negro</div>
       <div class="n">GYM MENGO</div>
+      <div class="dono">Raphael</div>
     </div>
     <nav id="navLado" role="tablist" aria-label="Seções"></nav>
-    <div class="pe" id="rodapeLado">Instale pelo ícone da barra de endereço para abrir como aplicativo.</div>
+    <div class="pe">Para instalar no computador, clique no ícone de instalar na barra de endereço.</div>
   </aside>
 
   <div class="col">
@@ -61,8 +62,9 @@
     <main>
       <!-- ============ TREINO ============ -->
       <section class="view" id="v-treino" role="tabpanel" aria-label="Treino">
+
         <div class="datebar">
-          <button class="nav" id="dAnt" type="button" aria-label="Dia anterior">
+          <button class="seta" id="dAnt" type="button" aria-label="Dia anterior">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
           </button>
           <div class="mid">
@@ -70,30 +72,41 @@
             <div class="ds" id="dataSemana">quarta-feira</div>
           </div>
           <button class="hoje" id="btnHoje" type="button" hidden>Hoje</button>
-          <button class="nav" id="dProx" type="button" aria-label="Próximo dia">
+          <button class="seta" id="dProx" type="button" aria-label="Próximo dia">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
           </button>
         </div>
 
-        <div id="areaInicio"></div>
+        <div class="ciclo">
+          <div class="ciclo-top">
+            <span class="ct" id="cicloTitulo">Ciclo 1</span>
+            <span class="cs" id="cicloSub">nenhum treino concluído ainda</span>
+          </div>
+          <div class="pips" id="pips"></div>
+        </div>
 
-        <div class="lbl" id="rotuloTreino" hidden>Treino do dia</div>
-        <div class="pick" id="seletor" hidden></div>
+        <div class="lbl">Treino do dia</div>
+        <div class="escolha">
+          <select id="selTreino" aria-label="Escolher o treino do dia"></select>
+          <div class="escolha-nota" id="notaEscolha"></div>
+        </div>
 
+        <div id="areaFim"></div>
         <div class="exs" id="listaEx"></div>
       </section>
 
       <!-- ============ CALENDÁRIO ============ -->
       <section class="view" id="v-calendario" role="tabpanel" aria-label="Calendário" hidden>
         <div class="datebar">
-          <button class="nav" id="mAnt" type="button" aria-label="Mês anterior">
+          <button class="seta" id="mAnt" type="button" aria-label="Mês anterior">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
           </button>
           <div class="mid">
             <div class="dd" id="mesNome">Novembro</div>
             <div class="ds" id="mesAno">2026</div>
           </div>
-          <button class="nav" id="mProx" type="button" aria-label="Próximo mês">
+          <button class="hoje" id="btnMesHoje" type="button">Hoje</button>
+          <button class="seta" id="mProx" type="button" aria-label="Próximo mês">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
           </button>
         </div>
@@ -101,8 +114,8 @@
         <div class="card">
           <div class="cal" id="calendario"></div>
           <div class="legenda">
-            <span><i class="c1"></i>Treino completo</span>
-            <span><i class="c2"></i>Começado</span>
+            <span><i class="c1"></i>Treino finalizado</span>
+            <span><i class="c2"></i>Em andamento</span>
             <span><i class="c3"></i>Hoje</span>
           </div>
           <div class="mesinfo">
@@ -113,7 +126,7 @@
         </div>
 
         <div class="card">
-          <h3>Histórico recente</h3>
+          <h3>Histórico</h3>
           <p class="hint">Toque em um treino para abrir e conferir as cargas.</p>
           <div class="prs" id="historico"></div>
         </div>
@@ -143,7 +156,7 @@
         <div class="two">
           <div class="card">
             <h3>Volume por treino</h3>
-            <p class="hint" id="dicaGrafico">Carga vezes repetições das séries concluídas, nos últimos treinos.</p>
+            <p class="hint" id="dicaGrafico">Carga vezes repetições das séries concluídas.</p>
             <div class="chart" id="grafico"></div>
           </div>
 
@@ -166,13 +179,6 @@
       <!-- ============ AJUSTES ============ -->
       <section class="view" id="v-ajustes" role="tabpanel" aria-label="Ajustes" hidden>
         <div class="card">
-          <h3>Quem treina</h3>
-          <p class="hint">Aparece no topo do app.</p>
-          <input class="txt" id="nome" type="text" placeholder="Seu nome" maxlength="24"
-                 aria-label="Nome de quem treina">
-        </div>
-
-        <div class="card">
           <h3>Descanso entre séries</h3>
           <p class="hint">O cronômetro dispara sozinho quando você marca uma série.</p>
           <div class="row">
@@ -188,17 +194,24 @@
           </div>
           <div class="row">
             <div class="rl">
-              <div class="t">Aviso sonoro</div>
-              <div class="s">Um bipe quando o descanso acaba</div>
+              <div class="t">Vinheta no fim do descanso</div>
+              <div class="s" id="estadoSom">Toca a vinheta do Flamengo</div>
             </div>
-            <button class="toggle" id="bipe" type="button">Ligado</button>
+            <button class="toggle" id="bipe" type="button">Ligada</button>
           </div>
           <div class="row">
             <div class="rl">
               <div class="t">Vibração</div>
-              <div class="s">Funciona no Android, o iPhone ignora</div>
+              <div class="s">Funciona no Android. O iPhone não permite.</div>
             </div>
             <button class="toggle" id="vibra" type="button">Ligada</button>
+          </div>
+          <div class="row">
+            <div class="rl">
+              <div class="t">Testar o som agora</div>
+              <div class="s">Confirme se o volume e o modo silencioso deixam passar</div>
+            </div>
+            <button class="toggle" id="testarSom" type="button">Tocar</button>
           </div>
         </div>
 
@@ -226,7 +239,8 @@
 
         <div class="card">
           <h3>A sequência</h3>
-          <p class="hint">Não existe dia certo na semana. Faltou um dia, é só continuar de onde parou.</p>
+          <p class="hint">Não existe dia certo na semana. Cada treino some da lista depois de
+            finalizado e volta quando o ciclo recomeça.</p>
           <div class="prs" id="listaSeq"></div>
         </div>
       </section>
@@ -244,8 +258,10 @@
   </div>
 </div>
 
-<nav class="nav" id="navBaixo" role="tablist" aria-label="Seções"></nav>
+<nav class="tabbar" id="navBaixo" role="tablist" aria-label="Seções"></nav>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<audio id="som" src="vinheta.mp3" preload="auto" playsinline></audio>
 
 <script src="app.js"></script>
 </body>

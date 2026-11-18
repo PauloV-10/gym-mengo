@@ -1,11 +1,12 @@
 /* Gym Mengo: cache do app para funcionar sem internet. */
-var CACHE = "gym-mengo-v1";
+var CACHE = "gym-mengo-v3";
 var ARQUIVOS = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
   "./manifest.webmanifest",
+  "./vinheta.mp3",
   "./icon-192.png",
   "./icon-512.png",
   "./icon-maskable-512.png"
@@ -43,6 +44,22 @@ self.addEventListener("fetch", function(e){
           return r;
         }).catch(function(){ return hit; });
         return hit || rede;
+      })
+    );
+    return;
+  }
+
+  /* miniaturas dos exercicios: guarda depois de baixar, pra funcionar offline */
+  if(url.hostname === "img.youtube.com" || url.hostname === "i.ytimg.com"){
+    e.respondWith(
+      caches.match(req).then(function(hit){
+        return hit || fetch(req).then(function(r){
+          if(r && r.status === 200){
+            var copia = r.clone();
+            caches.open(CACHE).then(function(c){ c.put(req, copia); });
+          }
+          return r;
+        }).catch(function(){ return hit; });
       })
     );
     return;
